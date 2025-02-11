@@ -47,12 +47,19 @@ function App() {
       const userAccount = await signer.getAddress();
       setAccount(userAccount);
 
+      await addEventListener(contractInstance);
       await loadCodinomes(contractInstance);
       await updateRanking(contractInstance);
     } catch (error) {
       console.error('Erro ao inicializar:', error);
       alert(MESSAGES.INITIALIZATION_ERROR);
     }
+  };
+
+  const addEventListener = async (contract) =>  {
+    contract.on("ChangeEvent", async () => {
+      await updateRanking(contract);
+    });
   };
 
   const loadCodinomes = async (contract) => {

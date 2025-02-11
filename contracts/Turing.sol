@@ -18,6 +18,9 @@ contract Turing is ERC20, Ownable {
     // Estado da votação
     bool public votingEnabled = true;
 
+    // Evento para atualizar o ranking
+    event ChangeEvent(address recipient, string codename, uint256 amount);
+
     // Modifier para restringir funções apenas ao owner ou à professora
     modifier onlyOwnerOrProfessora() {
         require(msg.sender == owner() || msg.sender == professora, "Apenas o owner ou a professora podem executar esta funcao");
@@ -36,6 +39,11 @@ contract Turing is ERC20, Ownable {
         _;
     }
 
+    // Modifier para verificar se o sender está na lista
+    modifier onlySenderOnList() {
+        require(bytes(codinomesInverso[msg.sender]).length != 0, "Sender nao autorizado");
+        _;
+    }
     // Modifier para restringir funções apenas users não owner ou users não professora
     modifier onlyNotOwnerOrProfessora() {
         require(msg.sender != owner() && msg.sender != professora, "Apenas usuarios comuns podem votar(nao owner ou professora)");
@@ -120,10 +128,11 @@ contract Turing is ERC20, Ownable {
     function issueToken(string memory codinome, uint256 quantidade) public onlyOwnerOrProfessora onlyAuthorized(codinome) {
         address receptor = codinomes[codinome];
         _mint(receptor, quantidade);
+        emit ChangeEvent(receptor, codinome, quantidade);
     }
 
     // Função para votar
-    function vote(string memory codinome, uint256 quantidade) public votingIsOn onlyNotOwnerOrProfessora onlyAuthorized(codinome) {
+    function vote(string memory codinome, uint256 quantidade) public votingIsOn onlyNotOwnerOrProfessora onlyAuthorized(codinome) onlySenderOnList() {
         require(quantidade <= 2 * 10**18, "Quantidade de Turings nao pode ser maior que 2");
         require(!hasVoted[msg.sender][codinome], "Voce ja votou neste codinome");
         require(codinomes[codinome] != msg.sender, "Voce nao pode votar em si mesmo");
@@ -136,6 +145,8 @@ contract Turing is ERC20, Ownable {
 
         // Marca o voto como realizado
         hasVoted[msg.sender][codinome] = true;
+
+        emit ChangeEvent(codinomes[codinome], codinome, quantidade);
     }
 
     // Função para ativar a votação
