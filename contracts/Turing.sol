@@ -36,6 +36,12 @@ contract Turing is ERC20, Ownable {
         _;
     }
 
+    // Modifier para restringir funções apenas users não owner ou users não professora
+    modifier onlyNotOwnerOrProfessora() {
+        require(msg.sender != owner() && msg.sender != professora, "Apenas usuarios comuns podem votar(nao owner ou professora)");
+        _;
+    }
+
     // Construtor do contrato
     constructor() ERC20("Turing", "TUR") {
 
@@ -117,7 +123,7 @@ contract Turing is ERC20, Ownable {
     }
 
     // Função para votar
-    function vote(string memory codinome, uint256 quantidade) public votingIsOn onlyAuthorized(codinome) {
+    function vote(string memory codinome, uint256 quantidade) public votingIsOn onlyNotOwnerOrProfessora onlyAuthorized(codinome) {
         require(quantidade <= 2 * 10**18, "Quantidade de Turings nao pode ser maior que 2");
         require(!hasVoted[msg.sender][codinome], "Voce ja votou neste codinome");
         require(codinomes[codinome] != msg.sender, "Voce nao pode votar em si mesmo");

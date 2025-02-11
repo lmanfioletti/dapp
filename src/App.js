@@ -78,8 +78,6 @@ function App() {
       console.error('Erro ao atualizar ranking:', error);
       alert(MESSAGES.RANKING_UPDATE_ERROR);
     }
-    setSelected({issue: '', token: ''});
-    setAmount({issue: '', token: ''});
   };
 
   const handleIssueTokens = async () => {
@@ -91,6 +89,7 @@ function App() {
       await tx.wait();
       alert(MESSAGES.TOKEN_ISSUED_SUCCESS);
       await updateRanking(contract);
+      resetInputs();
     } catch (error) {
       console.error('Erro ao emitir tokens:', error);
       alert('Erro ao emitir tokens. Verifique o console.');
@@ -108,6 +107,7 @@ function App() {
       await tx.wait();
       alert(MESSAGES.VOTE_SUCCESS);
       await updateRanking(contract);
+      resetInputs();
     } catch (error) {
       console.error('Erro ao votar:', error);
       alert('Erro ao votar. Verifique o console.');
@@ -115,6 +115,11 @@ function App() {
       setLoading(false);
     }
   };
+
+  const resetInputs = () => {
+    setSelected({issue: '', token: ''});
+    setAmount({issue: '', token: ''});
+  }
 
   const toggleVoting = async (method) => {
     setLoading(true);
